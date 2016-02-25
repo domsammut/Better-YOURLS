@@ -3,7 +3,7 @@
 # http://thereforei.am/2011/04/21/git-to-svn-automated-wordpress-plugin-deployment/
 # A modification of Dean Clatworthy's deploy script as found here: https://github.com/deanc/wordpress-plugin-git-svn
 # The difference is that this script lives in the plugin's git repo & doesn't require an existing SVN repo.
-# This version is a further modification of Paul Clark's script from https://github.com/pdclark/deploy-plugin-to-wordpress-dot-org 
+# This version is a further modification of Paul Clark's script from https://github.com/pdclark/deploy-plugin-to-wordpress-dot-org
 # and is modified to hard-code the plugin slug as well as to assume the GIT version has already been tagged.
 
 # main config
@@ -21,16 +21,16 @@ SVNURL="http://plugins.svn.wordpress.org/$PLUGINSLUG" # Remote SVN repo on wordp
 
 # Let's begin...
 echo ".........................................."
-echo 
+echo
 echo "Preparing to deploy WordPress plugin"
-echo 
+echo
 echo ".........................................."
-echo 
+echo
 
 # Check version in readme.txt is the same as plugin file
 NEWVERSION1=`grep "^Stable tag" "$GITPATH/readme.txt" | awk -F' ' '{print $3}' | sed 's/[[:space:]]//g'`
 echo "readme version: $NEWVERSION1"
-NEWVERSION2=`grep "^Version" "$GITPATH/$MAINFILE" | awk -F' ' '{print $2}' | sed 's/[[:space:]]//g'`
+NEWVERSION2=`grep "^ \* Version" "$GITPATH/$MAINFILE" | awk -F' ' '{print $3}' | sed 's/[[:space:]]//g'`
 echo "$MAINFILE version: $NEWVERSION2"
 
 if [ "$NEWVERSION1" != "$NEWVERSION2" ]; then echo "Versions don't match. Exiting...."; exit 1; fi
@@ -49,7 +49,7 @@ echo "Versions match in readme.txt and PHP file. Let's proceed..."
 #git push origin master
 #git push origin master --tags
 
-echo 
+echo
 echo "Creating local copy of SVN repo ..."
 svn co $SVNURL $SVNPATH
 
@@ -57,10 +57,19 @@ echo "Exporting the HEAD of master from git to the trunk of SVN"
 git checkout-index -a -f --prefix=$SVNPATH/trunk/
 
 echo "Ignoring github specific files and deployment script"
-svn propset svn:ignore "deploy.sh
+svn propset svn:ignore "
+deploy.sh
 README.md
 .git
-.gitignore" "$SVNPATH/trunk/"
+.gitignore
+composer.json
+composer.lock
+Gruntfile.js
+package.json
+phpunit.xml
+.travis.yml
+bootstrap.php
+tests" "$SVNPATH/trunk/"
 
 echo "Changing directory to SVN and committing to trunk"
 cd $SVNPATH/trunk/
